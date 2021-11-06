@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client</title>
+    <style type="text/css">
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+
+        .game {
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            background-color: rgba(184, 234, 243, 0.692);
+            border-radius: 25px;
+
+        }
+
+        .titolo {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            left: 50%;
+            top: 29%;
+        }
+
+        .body {
+            height: 100%;
+            background-color: #3a83bb;
+            font-family: 'Bebas Neue', cursive;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 80px 80px 80px 80px;
+            grid-template-rows: 80px 80px 80px 80px;
+            font-family: 'Bebas Neue', cursive;
+        }
+
+        .Button {
+            position: relative;
+            left: 30%;
+            background-color: white;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+            border-radius: 15px;
+        }
+
+        .grid button {
+            background-color: white;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+            border-radius: 15px;
+
+        }
+
+        .footer {
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .footer button {
+            border: none;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 5px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+            padding: 5px;
+            width: 80px;
+            background-color: #D4EE9F;
+            color: #003333;
+            outline: none;
+            cursor: pointer;
+        }
+
+
+        .footer button:hover {
+            color: #D4EE9F;
+            background-color: #003333;
+        }
+
+        .footer span {
+            flex: 1;
+            text-align: center;
+            font-size: 20px;
+            color: #D4EE9F;
+            font-weight: bold;
+            margin: auto 0;
+        }
+
+        .message {
+            color: #AA3939;
+            height: 80px;
+        }
+    </style>
+</head>
+
+<body class="body">
+    <img class="titolo" src="https://www.maginteractive.com/files/pages/37/982622/dt/Ruzzle_Logo_2015.png">
+    <div class="game">
+        <input class="Button" type="button" value="Random" id="RandomBtn" onclick="RandomLettere()">
+        <div class="grid" onkeypress="Conferma(event)">
+            <button id="btn1" onmouseenter="Evidenzia(this.id)" ondblclick="DoppioClick()"></button>
+            <button id="btn2" onmouseenter="Evidenzia(this.id)" ondblclick="DoppioClick()"></button>
+            <button id="btn3" onmouseenter="Evidenzia(this.id)" ondblclick="DoppioClick()"></button>
+            <button id="btn4" onmouseenter="Evidenzia(this.id)" ondblclick="DoppioClick()"></button>
+            <button id="btn5" onmouseover="Evidenzia(this.id)" ondblclick="DoppioClick()"></button>
+            <button id="btn6" onmouseover="Evidenzia(this.id)" ondblclick="DoppioClick()"></button>
+            <button id="btn7" onmouseover="Evidenzia(this.id)" ondblclick="DoppioClick()"></button>
+            <button id="btn8" onmouseover="Evidenzia(this.id)" ondblclick="DoppioClick()"></button>
+            <button id="btn9" onmouseover="Evidenzia(this.id)" ondblclick="DoppioClick()"></button>
+            <button id="btn10" onmouseover="Evidenzia(this.id)" ondblclick="DoppioClick()"></button>
+            <button id="btn11" onmouseover="Evidenzia(this.id)" ondblclick="DoppioClick()"></button>
+            <button id="btn12" onmouseover="Evidenzia(this.id)" ondblclick="DoppioClick()"></button>
+            <button id="btn13" onmouseover="Evidenzia(this.id)" ondblclick="DoppioClick()"></button>
+            <button id="btn14" onmouseover="Evidenzia(this.id)" ondblclick="DoppioClick()"></button>
+            <button id="btn15" onmouseover="Evidenzia(this.id)" ondblclick="DoppioClick()"></button>
+            <button id="btn16" onmouseover="Evidenzia(this.id)" ondblclick="DoppioClick()"></button>
+
+        </div>
+    </div>
+
+
+    <input type="text" id="nomeUtente">
+    <input type="button" value="ACCEDI" onclick="accedi()">
+    <input type="button" value="punto++" onclick="incrementaPunti()">
+
+
+
+
+    <script>
+        let clientID = null;
+        let ws = new WebSocket("ws://localhost:3002");                 //impostare ogni volta indirizzo ip dispostivo server 
+        let nomeUtente = null;
+        let contatorePunti = 0;
+
+        ws.onmessage = message => {
+            const response = JSON.parse(message.data);
+            if (response.method === "connect") {
+                clientID = response.clientID;
+                console.log("CLIENT ID: " + clientID + "CONNECTED");
+
+            }
+            if (response.method === "go") {
+                //start della partita
+                console.log("Partita iniziata!");
+            }
+            if (response.method === "mancano15") {
+                //mancano 15 secondi alla fine della partita
+                console.log("Mancano 15 secondi alla fine della partita!");
+            }
+            if (response.method == "finePartitaClient") {
+                //la partita è finita
+                console.log("FINE PARTITA!");
+            }
+
+        }
+
+        function accedi() {
+            nomeUtente = document.getElementById("nomeUtente").value;
+            const payLoad = {
+                "method": "accept",
+                "type": "client",
+                "clientID": clientID,
+                "nome": nomeUtente
+            }
+            ws.send(JSON.stringify(payLoad));
+        }
+
+        function incrementaPunti() {
+            contatorePunti = contatorePunti + 1;
+            const payLoad = {
+                "method": "incPunti",
+                "clientID": clientID,
+                "punto": contatorePunti,
+                "nome": nomeUtente
+            }
+            ws.send(JSON.stringify(payLoad));
+        }
+
+
+
+        //gestione js per il gioco
+        let Vocali = 'AEIOU';
+        let Consonanti = 'BCDFGHJKLMNPQRSTVWXYZ';
+        let Parola = "";
+        let c;
+        function RandomLettere() {
+            document.getElementById("btn1").innerHTML = Vocali.charAt(Math.floor(Math.random() * Vocali.length));
+            document.getElementById("btn2").innerHTML = Consonanti.charAt(Math.floor(Math.random() * Consonanti.length));
+            document.getElementById("btn3").innerHTML = Vocali.charAt(Math.floor(Math.random() * Vocali.length));
+            document.getElementById("btn4").innerHTML = Consonanti.charAt(Math.floor(Math.random() * Consonanti.length));
+            document.getElementById("btn5").innerHTML = Vocali.charAt(Math.floor(Math.random() * Vocali.length));
+            document.getElementById("btn6").innerHTML = Consonanti.charAt(Math.floor(Math.random() * Consonanti.length));
+            document.getElementById("btn7").innerHTML = Vocali.charAt(Math.floor(Math.random() * Vocali.length));
+            document.getElementById("btn8").innerHTML = Consonanti.charAt(Math.floor(Math.random() * Consonanti.length));
+            document.getElementById("btn9").innerHTML = Vocali.charAt(Math.floor(Math.random() * Vocali.length));
+            document.getElementById("btn10").innerHTML = Consonanti.charAt(Math.floor(Math.random() * Consonanti.length));
+            document.getElementById("btn11").innerHTML = Vocali.charAt(Math.floor(Math.random() * Vocali.length));
+            document.getElementById("btn12").innerHTML = Consonanti.charAt(Math.floor(Math.random() * Consonanti.length));
+            document.getElementById("btn13").innerHTML = Vocali.charAt(Math.floor(Math.random() * Vocali.length));
+            document.getElementById("btn14").innerHTML = Consonanti.charAt(Math.floor(Math.random() * Consonanti.length));
+            document.getElementById("btn15").innerHTML = Vocali.charAt(Math.floor(Math.random() * Vocali.length));
+            document.getElementById("btn16").innerHTML = Consonanti.charAt(Math.floor(Math.random() * Consonanti.length));
+            document.getElementById("RandomBtn").disabled = true;
+        }
+        function Evidenzia(id) {
+            document.getElementById(id).style.background = '#FF9900';
+            let c = document.getElementById(id).textContent;
+            Parola = Parola + c;
+        }
+        function NotEvidenzia() {
+            for (let i = 1; i < 16; i++) {
+                var btn = "btn" + i.toString();
+                document.getElementById(btn).style.background = '#FFFFFF';
+            }
+        }
+        function DoppioClick() {
+            NotEvidenzia();
+            alert(Parola);
+        }
+/*function Conferma(event){
+            if (event.keyCode == 13) {
+                alert(Parola);
+             }
+        }*/
+
+
+
+
+    </script>
+
+</body>
+
+</html>
